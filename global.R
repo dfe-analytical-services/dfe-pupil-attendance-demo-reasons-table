@@ -4,6 +4,14 @@ shhh(library(shiny))
 shhh(library(ggplot2))
 shhh(library(dplyr))
 shhh(library(styler))
+shhh(library(data.table))
+shhh(library(stringr))
+shhh(library(plotly))
+shhh(library(DT))
+shhh(library(leaflet))
+shhh(library(raster))
+shhh(library(sf))
+shhh(library(rgdal))
 
 tidy_code_function <- function() {
   message("----------------------------------------")
@@ -20,40 +28,24 @@ tidy_code_function <- function() {
   return(script_changes)
 }
 
+attendance_data_ytd <- read.csv(file = "ees_ytd_data_.csv") %>%
+  as.data.frame() %>%
+  mutate_at(c(1, 11:64), as.numeric)
 
-data <- data.frame(
-  time_period = c(
-    2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021,
-    2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021,
-    2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021,
-    2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021,
-    2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021,
-    2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021,
-    2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021,
-    2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021,
-    2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021
-  ),
-  area = c(
-    "England", "England", "England", "England", "England", "England", "England", "England",
-    "North East", "North East", "North East", "North East", "North East", "North East", "North East", "North East",
-    "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber",
-    "England", "England", "England", "England", "England", "England", "England", "England",
-    "North East", "North East", "North East", "North East", "North East", "North East", "North East", "North East",
-    "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber",
-    "England", "England", "England", "England", "England", "England", "England", "England",
-    "North East", "North East", "North East", "North East", "North East", "North East", "North East", "North East",
-    "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber", "Yorkshire and the Humber"
-  ),
-  phase = c(
-    "All", "All", "All", "All", "All", "All", "All", "All",
-    "All", "All", "All", "All", "All", "All", "All", "All",
-    "All", "All", "All", "All", "All", "All", "All", "All",
-    "Primary", "Primary", "Primary", "Primary", "Primary", "Primary", "Primary", "Primary",
-    "Primary", "Primary", "Primary", "Primary", "Primary", "Primary", "Primary", "Primary",
-    "Primary", "Primary", "Primary", "Primary", "Primary", "Primary", "Primary", "Primary",
-    "Secondary", "Secondary", "Secondary", "Secondary", "Secondary", "Secondary", "Secondary", "Secondary",
-    "Secondary", "Secondary", "Secondary", "Secondary", "Secondary", "Secondary", "Secondary", "Secondary",
-    "Secondary", "Secondary", "Secondary", "Secondary", "Secondary", "Secondary", "Secondary", "Secondary"
-  ),
-  values = c(12. + sample(1:250, 24) / 250, 8. + sample(1:250, 24) / 250, 14. + sample(1:250, 24) / 250)
-)
+
+# Add geog lookup
+geog_lookup <- attendance_data_ytd %>%
+  dplyr::select(geographic_level, region_name, la_name) %>%
+  unique() %>%
+  arrange(region_name, la_name)
+
+geog_levels <- geog_lookup %>%
+  dplyr::select(geographic_level) %>%
+  unique() %>%
+  as.data.table()
+
+school_type_lookup <- attendance_data_ytd %>%
+  dplyr::select(geographic_level, school_type) %>%
+  unique() %>%
+  arrange(geographic_level, school_type)
+
